@@ -126,9 +126,18 @@ impl Term {
                 }
             }
             Term::Seq(stmts) => {
+                let mut typ_ctx = typ_ctx.clone();
+
                 let mut typ_end = Typ::atom("Unit");
                 for stmt in stmts {
-                    typ_end = stmt.typ(&typ_ctx)?;
+                    typ_end = match stmt {
+                        Stmt::Term(term) => term.typ(&typ_ctx)?,
+                        Stmt::Let(var, term) => {
+                            let t = term.typ(&typ_ctx)?;
+                            typ_ctx = typ_ctx.insert(var.to_string(), t.clone());
+                            t
+                        }
+                    };
                 }
 
                 Ok(typ_end)

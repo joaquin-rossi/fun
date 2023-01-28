@@ -1,4 +1,5 @@
-use crate::Term;
+use crate::terms::Stmt;
+use crate::terms::Term;
 
 use std::rc::Rc;
 
@@ -152,9 +153,18 @@ impl Term {
                 _ => unreachable!(),
             },
             Term::Seq(stmts) => {
+                let mut val_ctx = val_ctx.clone();
+
                 let mut val_end = Val::Unit;
                 for stmt in stmts {
-                    val_end = stmt.eval(val_ctx)?;
+                    val_end = match stmt {
+                        Stmt::Term(term) => term.eval(&val_ctx)?,
+                        Stmt::Let(var, term) => {
+                            let v = term.eval(&val_ctx)?;
+                            val_ctx = val_ctx.insert(var.to_string(), v.clone());
+                            v
+                        }
+                    };
                 }
 
                 Ok(val_end)

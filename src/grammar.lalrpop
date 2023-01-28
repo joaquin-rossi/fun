@@ -4,6 +4,7 @@ grammar;
 
 use fun::ast::Decl;
 use fun::terms::Term;
+use fun::terms::Stmt;
 use fun::typs::Typ;
 
 // utils
@@ -59,7 +60,7 @@ Decl: Decl = {
 pub Typ = Typ0;
 
 Typ0: Typ = {
-    <from:Typ0> "->" <to:Typ1> => Typ::func(from, to),
+    <from:Typ1> "->" <to:Typ0> => Typ::func(from, to),
     Typ1,
 };
 
@@ -85,7 +86,7 @@ Term1: Term = {
 
 Term2: Term = {
     "(" <Term0> ")",
-    "{" <SepNoTrail<Term0, ";">> "}" => Term::Seq(<>),
+    "{" <SepNoTrail<SeqStmt, ";">> "}" => Term::Seq(<>),
 
     <name:IdentTerm> => Term::var(name),
 
@@ -94,4 +95,9 @@ Term2: Term = {
     r"0b[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),
     r"0o[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),
     r"0x[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),
+};
+
+SeqStmt: Stmt = {
+    "let" <var:IdentParam> "=" <term:Term> => Stmt::Let(var.to_string(), term),
+    Term => Stmt::Term(<>),
 };

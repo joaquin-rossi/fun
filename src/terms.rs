@@ -22,7 +22,13 @@ pub enum Term {
         t_true: Box<Self>,
         t_false: Box<Self>,
     },
-    Seq(Vec<Term>),
+    Seq(Vec<Stmt>),
+}
+
+#[derive(Clone, Debug)]
+pub enum Stmt {
+    Term(Term),
+    Let(String, Term),
 }
 
 impl Term {
@@ -128,6 +134,15 @@ impl std::fmt::Display for Term {
                 }
                 write!(f, "}}")
             },
+        }
+    }
+}
+
+impl std::fmt::Display for Stmt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Stmt::Term(term) => write!(f, "{}", term),
+            Stmt::Let(var, term) => write!(f, "let {} = {}", var, term),
         }
     }
 }
