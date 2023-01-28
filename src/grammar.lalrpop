@@ -39,7 +39,9 @@ IdentUpper = r"[A-Z][A-Za-z0-9]*";
 
 IdentLower = r"[a-z][A-Za-z0-9]*";
 
-Ident = { IdentUpper, IdentLower };
+IdentTerm = { IdentUpper, IdentLower };
+
+IdentParam = { IdentLower, "_" };
 
 // declarations
 
@@ -71,7 +73,7 @@ Typ1: Typ = {
 pub Term = Term0;
 
 Term0: Term = {
-    "fun" <param_name:IdentLower> ":" <param_type:Typ> "=>" <body:Term> => Term::abs(param_name, param_type, body),
+    "fun" <param_name:IdentParam> ":" <param_type:Typ> "=>" <body:Term> => Term::abs(param_name, param_type, body),
     "if" <cond:Term> "then" <t_true:Term> "else" <t_false:Term> => Term::if_(cond, t_true, t_false),
     Term1,
 };
@@ -85,7 +87,7 @@ Term2: Term = {
     "(" <Term0> ")",
     "{" <SepNoTrail<Term0, ";">> "}" => Term::Seq(<>),
 
-    <name:Ident> => Term::var(name),
+    <name:IdentTerm> => Term::var(name),
 
     // int
     r"[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),

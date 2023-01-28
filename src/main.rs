@@ -12,12 +12,11 @@ lalrpop_mod!(pub grammar);
 
 fn main() {
     let src = r#"
-let main = fun args:Unit => {
-    print 1;
-    print 2;
-    print (add 1 2);
-    add 1 2;
-    Unit
+let const = fun n:Int => fun _:Int => n;
+let const1 = const 1;
+
+let main = fun _:Unit => {
+    print (const1 5)
 };
 "#;
 

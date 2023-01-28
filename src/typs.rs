@@ -66,9 +66,9 @@ impl std::fmt::Display for TypError {
 }
 
 impl Term {
-    pub fn typ(&self, t_ctx: &TypContext) -> TypResult<Typ> {
+    pub fn typ(&self, typ_ctx: &TypContext) -> TypResult<Typ> {
         match self {
-            Term::Var { name } => match t_ctx.get(name) {
+            Term::Var { name } => match typ_ctx.get(name) {
                 Some(t) => Ok(t.clone()),
                 None => Err(TypError::Undefined(name.clone())),
             },
@@ -77,12 +77,18 @@ impl Term {
                 param_type,
                 body,
             } => {
-                let body_type = body.typ(&t_ctx.insert(param_name.clone(), param_type.clone()))?;
+                let typ_ctx = if param_name == "_" {
+                    typ_ctx.clone()
+                } else {
+                    typ_ctx.insert(param_name.clone(), param_type.clone())
+                };
+
+                let body_type = body.typ(&typ_ctx)?;
                 Ok(Typ::func(param_type.clone(), body_type.clone()))
             }
             Term::App { func, arg } => {
-                let func_type = func.typ(&t_ctx)?;
-                let arg_type = arg.typ(&t_ctx)?;
+                let func_type = func.typ(&typ_ctx)?;
+                let arg_type = arg.typ(&typ_ctx)?;
 
                 match &func_type {
                     Typ::Func { from, to } => {
@@ -105,13 +111,13 @@ impl Term {
                 t_true,
                 t_false,
             } => {
-                let typ_cond = cond.typ(&t_ctx)?;
+                let typ_cond = cond.typ(&typ_ctx)?;
                 if typ_cond != Typ::atom("Bool") {
                     return Err(TypError::Mismatch(Typ::atom("Bool"), typ_cond));
                 }
 
-                let typ_true = t_true.typ(&t_ctx)?;
-                let typ_false = t_false.typ(&t_ctx)?;
+                let typ_true = t_true.typ(&typ_ctx)?;
+                let typ_false = t_false.typ(&typ_ctx)?;
 
                 if typ_true == typ_false {
                     Ok(typ_true)
@@ -122,7 +128,7 @@ impl Term {
             Term::Seq(stmts) => {
                 let mut typ_end = Typ::atom("Unit");
                 for stmt in stmts {
-                    typ_end = stmt.typ(&t_ctx)?;
+                    typ_end = stmt.typ(&typ_ctx)?;
                 }
 
                 Ok(typ_end)

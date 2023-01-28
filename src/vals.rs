@@ -127,7 +127,13 @@ impl Term {
 
                 match &func {
                     Val::Abs { val_ctx, param, body } => {
-                        body.eval(&val_ctx.insert(param.clone(), arg))
+                        let val_ctx = if param == "_" {
+                            val_ctx.clone()
+                        } else {
+                            val_ctx.insert(param.clone(), arg)
+                        };
+
+                        body.eval(&val_ctx)
                     }
                     Val::Native(f) => f(arg),
                     _ => unreachable!(),
