@@ -6,6 +6,33 @@ use fun::ast::Decl;
 use fun::terms::Term;
 use fun::typs::Typ;
 
+// utils
+
+SepNoTrail<T, S>: Vec<T> = {
+    <T?> => match <> {
+        None => vec![],
+        Some(e) => vec![e],
+    },
+    <mut v:SepNoTrail<T, S>> S <e:T> => {
+        v.push(e);
+        v
+    }
+};
+
+SepMayTrail<T, S>: Vec<T> = {
+    <mut v:(<T> S)*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
+
+SepMustTrail<T, S>: Vec<T> = {
+    (<T> S)*
+}
+
 // identifiers
 
 IdentUpper = r"[A-Z][A-Za-z0-9]*";
@@ -17,7 +44,7 @@ Ident = { IdentUpper, IdentLower };
 // declarations
 
 pub Program: Vec<Decl> = {
-    <d:(<Decl> ";")*> => d,
+    SepMustTrail<Decl, ";">
 };
 
 Decl: Decl = {
@@ -56,6 +83,7 @@ Term1: Term = {
 
 Term2: Term = {
     "(" <Term0> ")",
+    "{" <SepNoTrail<Term0, ";">> "}" => Term::Seq(<>),
 
     <name:Ident> => Term::var(name),
 

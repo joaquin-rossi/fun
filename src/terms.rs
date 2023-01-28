@@ -22,6 +22,7 @@ pub enum Term {
         t_true: Box<Self>,
         t_false: Box<Self>,
     },
+    Seq(Vec<Term>),
 }
 
 impl Term {
@@ -117,6 +118,16 @@ impl std::fmt::Display for Term {
                 t_true,
                 t_false,
             } => write!(f, "(if {} then {} else {})", cond, t_true, t_false),
+            Term::Seq(stmts) => {
+                write!(f, "{{")?;
+                for (i, stmt) in stmts.iter().enumerate() {
+                    if i != 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{}", stmt)?;
+                }
+                write!(f, "}}")
+            },
         }
     }
 }

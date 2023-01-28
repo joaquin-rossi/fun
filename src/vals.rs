@@ -145,6 +145,14 @@ impl Term {
                 Val::Bool(false) => t_false.eval(val_ctx),
                 _ => unreachable!(),
             },
+            Term::Seq(stmts) => {
+                let mut val_end = Val::Unit;
+                for stmt in stmts {
+                    val_end = stmt.eval(val_ctx)?;
+                }
+
+                Ok(val_end)
+            }
         }
     }
 }

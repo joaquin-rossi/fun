@@ -12,7 +12,13 @@ lalrpop_mod!(pub grammar);
 
 fn main() {
     let src = r#"
-let main = fun args:Unit => print (add 34 35);
+let main = fun args:Unit => {
+    print 1;
+    print 2;
+    print (add 1 2);
+    add 1 2;
+    Unit
+};
 "#;
 
     handle(src);
@@ -69,7 +75,7 @@ fn handle(src: &str) {
             match ctx.typ(&main) {
                 Ok(typ) => {
                     if typ != Typ::func(Typ::atom("Unit"), Typ::atom("Unit")) {
-                        eprintln!("Invalid type defined for main");
+                        eprintln!("Invalid type defined for main ({}): it must have type Unit -> Unit", typ);
                         return;
                     }
                 }

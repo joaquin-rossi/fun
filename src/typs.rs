@@ -119,6 +119,14 @@ impl Term {
                     Err(TypError::Mismatch(typ_true, typ_false))
                 }
             }
+            Term::Seq(stmts) => {
+                let mut typ_end = Typ::atom("Unit");
+                for stmt in stmts {
+                    typ_end = stmt.typ(&t_ctx)?;
+                }
+
+                Ok(typ_end)
+            }
         }
     }
 }
