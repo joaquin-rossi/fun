@@ -1,0 +1,15 @@
+[package]
+name = "fun"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+immutable-map = "0.1.2"
+lalrpop-util = { version = "0.19.8", features = [ "lexer" ] }
+lazy_static = "1.4.0"
+parse_int = "0.6.0"
+regex = "1"
+
+[build-dependencies]
+lalrpop = "0.19.8"

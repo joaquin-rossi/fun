@@ -1,0 +1,67 @@
+use parse_int;
+
+grammar;
+
+use fun::ast::Decl;
+use fun::terms::Term;
+use fun::typs::Typ;
+
+// identifiers
+
+IdentUpper = r"[A-Z][A-Za-z0-9]*";
+
+IdentLower = r"[a-z][A-Za-z0-9]*";
+
+Ident = { IdentUpper, IdentLower };
+
+// declarations
+
+pub Program: Vec<Decl> = {
+    <d:(<Decl> ";")*> => d,
+};
+
+Decl: Decl = {
+    "type" <name:IdentUpper> "=" <typ:Typ> => Decl::type_(name, typ),
+    "let" <name:IdentLower> "=" <term:Term> => Decl::let_(name, term),
+};
+
+// types
+
+pub Typ = Typ0;
+
+Typ0: Typ = {
+    <from:Typ0> "->" <to:Typ1> => Typ::func(from, to),
+    Typ1,
+};
+
+Typ1: Typ = {
+    <name:IdentUpper> => Typ::atom(name),
+    "(" <Typ0> ")",
+};
+
+// terms
+
+pub Term = Term0;
+
+Term0: Term = {
+    "fun" <param_name:IdentLower> ":" <param_type:Typ> "=>" <body:Term> => Term::abs(param_name, param_type, body),
+    "if" <cond:Term> "then" <t_true:Term> "else" <t_false:Term> => Term::if_(cond, t_true, t_false),
+    Term1,
+};
+
+Term1: Term = {
+    <t1:Term1> <t2:Term2> => Term::app(t1, t2),
+    Term2,
+}
+
+Term2: Term = {
+    "(" <Term0> ")",
+
+    <name:Ident> => Term::var(name),
+
+    // int
+    r"[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),
+    r"0b[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),
+    r"0o[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),
+    r"0x[0-9][0-9_]*" => Term::Int(parse_int::parse(<>).unwrap()),
+};
