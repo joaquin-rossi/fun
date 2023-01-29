@@ -3,13 +3,13 @@ use crate::typs::*;
 
 #[derive(Debug)]
 pub enum Decl {
-    Typ(String, Typ),
+    Type(String, Typ),
     Let(String, Term),
 }
 
 impl Decl {
     pub fn type_(name: &str, typ: Typ) -> Self {
-        Decl::Typ(name.to_string(), typ)
+        Decl::Type(name.to_string(), typ)
     }
 
     pub fn let_(name: &str, term: Term) -> Self {

@@ -1,28 +1,33 @@
-use fun::ast::Decl;
-use fun::terms::Term;
-use fun::typs;
-use fun::typs::Typ;
-use fun::vals::Val;
-use fun::ProgramContext;
+use std::io::Read;
+use fun::{ast::Decl, terms::Term, typs, typs::Typ, vals::Val, ProgramContext};
 
 #[macro_use]
 extern crate lalrpop_util;
-
 lalrpop_mod!(pub grammar);
 
-fn main() {
-    let src = r#"
-let id = fun x:(Int -> Int -> Int) => x;
+fn main() -> std::io::Result<()> {
+    let args: Vec<_> = std::env::args().collect();
 
-let main = fun _:Unit => {
-    let x = id add;
-    let y = x 1;
-    let z = y 2;
-    print z
-};
-"#;
+    let mut src = String::new();
+    match args.len() {
+        0 => unreachable!(),
+        2 => {
+            if &args[1] == "-" {
+                let mut stdin = std::io::stdin();
+                stdin.read_to_string(&mut src)?;
+            } else {
+                src = std::fs::read_to_string(&args[1])?;
+            }
+        }
+        _ => {
+            eprintln!("usage: {} [file]", args[0]);
+            std::process::exit(1);
+        }
+    };
 
-    handle(src);
+    handle(&src);
+
+    Ok(())
 }
 
 fn handle(src: &str) {
@@ -41,7 +46,7 @@ fn handle(src: &str) {
 
     for decl in &program {
         match decl {
-            Decl::Typ(_, _) => {
+            Decl::Type(_, _) => {
                 todo!();
             }
             Decl::Let(name, term) => {
@@ -76,7 +81,10 @@ fn handle(src: &str) {
             match ctx.typ(&main) {
                 Ok(typ) => {
                     if typ != Typ::func(Typ::atom("Unit"), Typ::atom("Unit")) {
-                        eprintln!("Invalid type defined for main ({}): it must have type Unit -> Unit", typ);
+                        eprintln!(
+                            "Invalid type defined for main ({}): it must have type Unit -> Unit",
+                            typ
+                        );
                         return;
                     }
                 }

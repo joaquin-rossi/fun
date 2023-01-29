@@ -20,7 +20,7 @@ impl Typ {
 }
 
 #[macro_export]
-macro_rules! _types_func {
+macro_rules! _typs_func {
     ($from:expr, $to:expr) => {
         Typ::func($from, $to)
     };
@@ -29,7 +29,7 @@ macro_rules! _types_func {
         func!($from, func!($to1, $($tos),+))
     }
 }
-pub use _types_func as func;
+pub use _typs_func as func;
 
 impl std::fmt::Display for Typ {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -74,33 +74,33 @@ impl Term {
             },
             Term::Abs {
                 param_name,
-                param_type,
+                param_typ,
                 body,
             } => {
                 let typ_ctx = if param_name == "_" {
                     typ_ctx.clone()
                 } else {
-                    typ_ctx.insert(param_name.clone(), param_type.clone())
+                    typ_ctx.insert(param_name.clone(), param_typ.clone())
                 };
 
-                let body_type = body.typ(&typ_ctx)?;
-                Ok(Typ::func(param_type.clone(), body_type.clone()))
+                let body_typ = body.typ(&typ_ctx)?;
+                Ok(Typ::func(param_typ.clone(), body_typ.clone()))
             }
             Term::App { func, arg } => {
-                let func_type = func.typ(&typ_ctx)?;
-                let arg_type = arg.typ(&typ_ctx)?;
+                let func_typ = func.typ(&typ_ctx)?;
+                let arg_typ = arg.typ(&typ_ctx)?;
 
-                match &func_type {
+                match &func_typ {
                     Typ::Func { from, to } => {
                         let from = *from.clone();
 
-                        if from == arg_type {
+                        if from == arg_typ {
                             Ok(*to.clone())
                         } else {
-                            Err(TypError::Mismatch(from, arg_type))
+                            Err(TypError::Mismatch(from, arg_typ))
                         }
                     }
-                    _ => Err(TypError::Expected("arrow type".to_string(), func_type)),
+                    _ => Err(TypError::Expected("arrow type".to_string(), func_typ)),
                 }
             }
 

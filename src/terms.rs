@@ -7,7 +7,7 @@ pub enum Term {
     },
     Abs {
         param_name: String,
-        param_type: Typ,
+        param_typ: Typ,
         body: Box<Self>,
     },
     App {
@@ -38,10 +38,10 @@ impl Term {
         }
     }
 
-    pub fn abs(param_name: &str, param_type: Typ, body: Self) -> Self {
+    pub fn abs(param_name: &str, param_typ: Typ, body: Self) -> Self {
         Term::Abs {
             param_name: param_name.to_string(),
-            param_type,
+            param_typ,
             body: Box::new(body),
         }
     }
@@ -112,9 +112,9 @@ impl std::fmt::Display for Term {
             Term::Var { name, .. } => write!(f, "{}", name),
             Term::Abs {
                 param_name,
-                param_type,
+                param_typ,
                 body,
-            } => write!(f, "(fun {}:{} => {})", param_name, param_type, body),
+            } => write!(f, "(fun {}:{} => {})", param_name, param_typ, body),
             Term::App { func, arg } => write!(f, "({} {})", func, arg),
 
             Term::Int(i) => write!(f, "{}", *i),

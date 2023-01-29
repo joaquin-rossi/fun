@@ -74,7 +74,7 @@ Typ1: Typ = {
 pub Term = Term0;
 
 Term0: Term = {
-    "fun" <param_name:IdentParam> ":" <param_type:Typ> "=>" <body:Term> => Term::abs(param_name, param_type, body),
+    "fun" <param_name:IdentParam> ":" <param_typ:Typ> "=>" <body:Term> => Term::abs(param_name, param_typ, body),
     "if" <cond:Term> "then" <t_true:Term> "else" <t_false:Term> => Term::if_(cond, t_true, t_false),
     Term1,
 };

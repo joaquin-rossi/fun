@@ -115,7 +115,7 @@ impl Term {
             },
             Term::Abs {
                 param_name,
-                param_type: _,
+                param_typ: _,
                 body,
             } => Ok(Val::Abs {
                 val_ctx: val_ctx.clone(),
